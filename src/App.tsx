@@ -56,6 +56,9 @@ const SYSTEM_USERS: User[] = [
   { id: 'u3', name: 'Furqan', avatar: 'https://picsum.photos/seed/furqan/100/100' },
   { id: 'u4', name: 'Jamal', avatar: 'https://picsum.photos/seed/jamal/100/100' },
   { id: 'u5', name: 'Ajmal', avatar: 'https://picsum.photos/seed/ajmal/100/100' },
+  { id: 'u6', name: 'Sara Anwer', avatar: 'https://picsum.photos/seed/sara/100/100' },
+  { id: 'u7', name: 'Ali Raza', avatar: 'https://picsum.photos/seed/ali/100/100' },
+  { id: 'u8', name: 'Naveed Ahmed', avatar: 'https://picsum.photos/seed/naveed/100/100' },
 ];
 
 const INITIAL_TASKS: Task[] = [
@@ -100,6 +103,56 @@ const INITIAL_TASKS: Task[] = [
     comments: [
       { userId: 'u4', userName: 'Jamal', text: 'Verified compliance standard ISO-9001.', timestamp: '2026-04-01 10:00' },
       { userId: 'u5', userName: 'Ajmal', text: 'Maternity leave policies updated.', timestamp: '2026-04-14 11:00' },
+    ],
+  },
+  {
+    id: 't4',
+    name: 'Finance Audit (Q1)',
+    assignees: [SYSTEM_USERS[7]], // Naveed
+    status: 'In Progress',
+    startDate: '2026-04-02',
+    dueDate: '2026-04-15',
+    followers: ['u2', 'u3'], // Dr. Bilal, Furqan
+    comments: [
+      { userId: 'u2', userName: 'Dr. Bilal', text: 'Check the tax reports for March.', timestamp: '2026-04-03 12:00' },
+      { userId: 'u7', userName: 'Ali Raza', text: 'Budget spreadsheets uploaded.', timestamp: '2026-04-04 15:30' },
+      { userId: 'u3', userName: 'Furqan', text: 'Looking at them now.', timestamp: '2026-04-05 09:15' },
+    ],
+  },
+  {
+    id: 't5',
+    name: 'Safety Inspection Report',
+    assignees: [SYSTEM_USERS[6]], // Ali Raza
+    status: 'Not Started',
+    startDate: '2026-04-12',
+    dueDate: '2026-04-18',
+    followers: ['u2', 'u4'], // Dr. Bilal, Jamal
+    comments: [],
+  },
+  {
+    id: 't6',
+    name: 'Legal Department Review',
+    assignees: [SYSTEM_USERS[0]], // Zahid
+    status: 'In Progress',
+    startDate: '2026-04-08',
+    dueDate: '2026-04-20',
+    followers: ['u5', 'u2'], // Ajmal, Dr. Bilal
+    comments: [
+      { userId: 'u5', userName: 'Ajmal', text: 'Contract terms updated.', timestamp: '2026-04-09 11:00' },
+      { userId: 'u2', userName: 'Dr. Bilal', text: 'Make sure it is signed by both parties.', timestamp: '2026-04-10 14:00' },
+    ],
+  },
+  {
+    id: 't7',
+    name: 'Marketing Material Approval',
+    assignees: [SYSTEM_USERS[5], SYSTEM_USERS[0]], // Sara and Zahid
+    status: 'Completed',
+    startDate: '2026-04-01',
+    dueDate: '2026-04-07',
+    followers: ['u3', 'u8'], // Furqan, Naveed
+    comments: [
+      { userId: 'u3', userName: 'Furqan', text: 'Colors for banners selected.', timestamp: '2026-04-02 10:00' },
+      { userId: 'u8', userName: 'Naveed Ahmed', text: 'Printing schedule confirmed.', timestamp: '2026-04-03 16:45' },
     ],
   },
 ];
@@ -164,11 +217,13 @@ export default function App() {
 
   // Export Logic: Download as CSV
   const handleExport = () => {
-    let csvContent = "data:text/csv;charset=utf-8,Task,User,Comment,Timestamp\n";
+    let csvContent = "data:text/csv;charset=utf-8,Task,User,Role,Comment,Timestamp\n";
     
     filteredTasks.forEach(task => {
       task.comments.forEach(c => {
-        csvContent += `"${task.name}","${c.userName}","${c.text.replace(/"/g, '""')}","${c.timestamp}"\n`;
+        const isSenior = task.followers.includes(c.userId);
+        const role = isSenior ? "Senior" : "Assignee/Member";
+        csvContent += `"${task.name}","${c.userName}","${role}","${c.text.replace(/"/g, '""')}","${c.timestamp}"\n`;
       });
     });
 
@@ -183,9 +238,11 @@ export default function App() {
 
   // Export Logic for a Single Task
   const handleExportTask = (task: Task) => {
-    let csvContent = "data:text/csv;charset=utf-8,Task,User,Comment,Timestamp\n";
+    let csvContent = "data:text/csv;charset=utf-8,Task,User,Role,Comment,Timestamp\n";
     task.comments.forEach(c => {
-      csvContent += `"${task.name}","${c.userName}","${c.text.replace(/"/g, '""')}","${c.timestamp}"\n`;
+      const isSenior = task.followers.includes(c.userId);
+      const role = isSenior ? "Senior" : "Assignee/Member";
+      csvContent += `"${task.name}","${c.userName}","${role}","${c.text.replace(/"/g, '""')}","${c.timestamp}"\n`;
     });
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
